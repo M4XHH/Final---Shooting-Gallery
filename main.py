@@ -95,9 +95,9 @@ class Bullet(Turtle):
             self.setheading(180 - (self.heading()))
         elif self.heading() == 0:
             self.heading(180)
-        if self.ycor() > 230:
+        if self.ycor() > 200:
             self.die()
-        if self.ycor() < -230:
+        if self.ycor() < -200:
             self.die()
 
     def die(self):
@@ -105,47 +105,19 @@ class Bullet(Turtle):
         if self in self.player.bullets:
             self.player.bullets.remove(self)
 
-def update():
-    global start
-    if time.time() - start > 3:
-        start = time.time()
-        for block in blocks:
-            block.goto(block.xcor(), block.ycor() - 20)
-    if p1.alive and p2.alive:
-        for bullet in p1.bullets:
-            bullet.move()
-            for block in blocks:
-                if bullet.distance(block) < 20:
-                    bullet.die()
-                    block.hit(blocks, p1, score1)
-                    score1.update_score()
-        for bullet in p2.bullets:
-            bullet.move()
-            for block in blocks:
-                if bullet.distance(block) < 20:
-                    bullet.die()
-                    block.hit(blocks, p2, score2)
-                    score2.update_score()
-
-
-
-
-
-    screen.ontimer(update, 30)
-
 class Score(Turtle):
-    def __init__(self,x,y):
+    def __init__(self,x,y, Player):
         super().__init__()
         self.ht()
         self.color("orange")
         self.pu()
         self.goto(x,y)
-        self.score = 0 
-        self.write(f"Score: {self.score}")
+        self.player = player
+        self.write(f"Score: {self.player.score}")
 
-    def update_score():
+    def update_score(self):
         self.clear()
-        self.write(f"Score: {self.score}")
+        self.write(f"Score: {self.player.score}")
 
 
 
@@ -161,6 +133,27 @@ def new_row():
             blocks.append(Block(x,190,"darkblue",blocks))
 
              
+def update():
+    global start
+    if time.time() - start > 3:
+        start = time.time()
+        for block in blocks:
+            block.goto(block.xcor(), block.ycor() - 20)
+    for player in players:
+        for score in scores:
+            for bullet in player.bullets:
+                bullet.move()
+                for block in blocks:
+                    if bullet.distance(block) < 20:
+                        block.die(player,score,blocks)
+                    else:
+                        bullet.die()
+                        block.hit(player, score, blocks)
+                        score.update_score()
+
+
+    screen.ontimer(update, 30)
+
 
 ### PROGRAM ###
 
@@ -169,14 +162,14 @@ screen.bgcolor("teal")
 screen.setup(600,600)
 screen.listen()
 playing_area()
-
-
-bullets = []
-blocks = []
 p1 = Player(-75, -175, "red","red",screen, "d", "a","w",True)
 p2 = Player(75,-175,"blue","blue",screen, "Right","Left","Up",True)
 score1 = Score (200,-200)
 score2 = Score (-230,-200)
+bullets = []
+blocks = []
+players = [p1,p2]
+
 # start = time.time()
 screen.tracer(0)
 for y in range(190, 100, -20):
@@ -189,5 +182,5 @@ for y in range(190, 100, -20):
             blocks.append(Block(x,y,"darkblue",blocks))
 screen.tracer(1)
 update()
-
+print("Thank you mr yin for this class it was very fun. I hope you have a good summer")
 screen.exitonclick()
